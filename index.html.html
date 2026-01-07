@@ -1,0 +1,627 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Operations Dashboard 2025 — Cost & Profit Focus</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.08);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.65);
+      --line: rgba(255,255,255,.12);
+      --good: #22c55e;
+      --warn: #f59e0b;
+      --bad:  #ef4444;
+      --accent:#60a5fa;
+      --accent2:#34d399;
+      --shadow: 0 18px 50px rgba(0,0,0,.35);
+      --radius: 18px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      color: var(--text);
+      background: radial-gradient(1200px 900px at 15% 5%, rgba(96,165,250,.25), transparent 55%),
+                  radial-gradient(900px 700px at 85% 15%, rgba(52,211,153,.22), transparent 55%),
+                  radial-gradient(900px 700px at 50% 110%, rgba(245,158,11,.18), transparent 60%),
+                  var(--bg);
+    }
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 18px 40px;
+    }
+    header {
+      display: flex;
+      gap: 14px;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+    .title {
+      display: grid;
+      gap: 4px;
+    }
+    h1 {
+      font-size: 24px;
+      margin: 0;
+      letter-spacing: .2px;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      margin: 0;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .pill {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.05);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 14px;
+    }
+    @media (max-width: 980px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    .card {
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      padding: 16px;
+    }
+    .card h2 {
+      margin: 0 0 12px 0;
+      font-size: 14px;
+      letter-spacing: .3px;
+      color: rgba(255,255,255,.88);
+    }
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    @media (max-width: 980px) {
+      .kpis { grid-template-columns: repeat(2, 1fr); }
+    }
+    .kpi {
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.16);
+      border-radius: 14px;
+      padding: 12px 12px 10px;
+      display: grid;
+      gap: 6px;
+      min-height: 86px;
+    }
+    .kpi .label {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .kpi .value {
+      font-size: 18px;
+      font-weight: 750;
+      letter-spacing: .2px;
+    }
+    .kpi .hint {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: rgba(255,255,255,.55);
+    }
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 980px) {
+      .split { grid-template-columns: 1fr; }
+    }
+    .mini {
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.15);
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .mini h3 {
+      margin: 0 0 8px 0;
+      font-size: 12px;
+      color: rgba(255,255,255,.85);
+      letter-spacing: .25px;
+    }
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 7px 0;
+      color: rgba(255,255,255,.82);
+      font-size: 12.5px;
+    }
+    .muted { color: var(--muted); }
+    .bar {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      overflow: hidden;
+      border: 1px solid var(--line);
+    }
+    .bar > div {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width .9s ease;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      overflow: hidden;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+    }
+    th, td {
+      padding: 10px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+    }
+    th {
+      color: rgba(255,255,255,.86);
+      font-size: 12px;
+      background: rgba(255,255,255,.05);
+      letter-spacing: .25px;
+    }
+    tr:last-child td { border-bottom: 0; }
+    .right { text-align: right; }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      font-size: 12px;
+      background: rgba(0,0,0,.12);
+      color: rgba(255,255,255,.85);
+      white-space: nowrap;
+    }
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: var(--good);
+    }
+    .dot.warn { background: var(--warn); }
+    .dot.bad  { background: var(--bad);  }
+    .footer {
+      margin-top: 14px;
+      color: rgba(255,255,255,.62);
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      cursor: pointer;
+      user-select: none;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.9);
+      padding: 9px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+    .btn:hover { background: rgba(255,255,255,.09); }
+    .callout {
+      border: 1px solid rgba(34,197,94,.35);
+      background: rgba(34,197,94,.08);
+      border-radius: 14px;
+      padding: 12px;
+      margin-top: 10px;
+      color: rgba(255,255,255,.88);
+      font-size: 12.8px;
+      line-height: 1.5;
+    }
+    .callout strong { color: #b7f7c9; }
+  /* ===== Theme system (Light/Dark) ===== */
+:root{
+  --bg:#0b1220;
+  --panel:rgba(255,255,255,.06);
+  --panel2:rgba(0,0,0,.16);
+  --text:rgba(255,255,255,.92);
+  --muted:rgba(255,255,255,.65);
+  --line:rgba(255,255,255,.12);
+  --shadow:0 18px 50px rgba(0,0,0,.35);
+  --accent:#60a5fa;
+  --accent2:#34d399;
+}
+html[data-theme="light"]{
+  --bg:#f6f8fc;
+  --panel:rgba(0,0,0,.04);
+  --panel2:rgba(255,255,255,.85);
+  --text:rgba(15,23,42,.95);
+  --muted:rgba(15,23,42,.62);
+  --line:rgba(15,23,42,.12);
+  --shadow:0 10px 28px rgba(15,23,42,.12);
+}
+body{
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}
+.card, .mini, .kpi, .field, .chartWrap{
+  box-shadow: var(--shadow) !important;
+}
+.card{
+  background: linear-gradient(180deg, var(--panel), rgba(255,255,255,.02)) !important;
+  border-color: var(--line) !important;
+}
+.mini, .kpi, .field, .chartWrap{
+  background: var(--panel2) !important;
+  border-color: var(--line) !important;
+}
+.pill, th, table, .btn{
+  border-color: var(--line) !important;
+}
+.btn{
+  background: var(--panel) !important;
+  color: var(--text) !important;
+}
+.btn:hover{
+  filter: brightness(1.05);
+}
+.confidential-badge{
+  border:1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.25px;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  white-space:nowrap;
+}
+.confidential-badge::before{
+  content:"🔒";
+  font-size:13px;
+}
+.watermark-logo{
+  position:fixed;
+  right:18px;
+  bottom:16px;
+  z-index:9999;
+  opacity:0.18;
+  pointer-events:none;
+  filter: grayscale(10%);
+}
+html[data-theme="light"] .watermark-logo{
+  opacity:0.12;
+}
+.watermark-logo img{
+  height:54px;
+  width:auto;
+}
+
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <h1>Operations Dashboard — 2025</h1>
+          <div class="subtitle" style="margin-top:8px;">
+            <span class="confidential-badge">Management – Confidential</span>
+          </div>
+        <p class="subtitle">
+          <span class="pill">Cost-cutting & profit protection</span>
+          <span class="pill" id="regionsPill"></span>
+          <span class="pill">Currency: SAR</span>
+        </p>
+      </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+  <button class="btn" id="toggleView">Toggle View: Service / Region</button>
+
+  <!-- ✅ Light/Dark Toggle -->
+  <button class="btn" id="themeToggle" title="Toggle Light/Dark">
+    Light mode
+  </button>
+
+  <button class="btn" id="downloadJson">Download JSON</button>
+</div>
+
+      </div>
+    </header>
+
+    <div class="card">
+      <h2>Executive Snapshot</h2>
+      <div class="kpis" id="kpiTiles"></div>
+      <div class="callout" id="headline"></div>
+    </div>
+
+    <div class="grid" style="margin-top:14px;">
+      <div class="card">
+        <h2 id="primaryTitle">Performance by Service (2025)</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Segment</th>
+              <th>Region</th>
+              <th class="right">Staff</th>
+              <th class="right">Revenue</th>
+              <th class="right">Cost</th>
+              <th class="right">Profit</th>
+              <th class="right">Margin</th>
+            </tr>
+          </thead>
+          <tbody id="segmentRows"></tbody>
+        </table>
+
+        <div class="split" style="margin-top:14px;">
+          <div class="mini">
+            <h3>Profitability Mix (Profit Share)</h3>
+            <div id="profitMix"></div>
+          </div>
+          <div class="mini">
+            <h3>Cost Pressure (Cost as % of Revenue)</h3>
+            <div id="costPressure"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Management Focus</h2>
+        <div class="mini">
+          <h3>Where to Attack Costs First</h3>
+          <div class="row"><span class="tag"><span class="dot bad"></span>Low-margin segment</span><span id="lowMargin"></span></div>
+          <div class="row"><span class="tag"><span class="dot warn"></span>Highest cost share</span><span id="highCost"></span></div>
+          <div class="row"><span class="tag"><span class="dot"></span>Best profit engine</span><span id="bestProfit"></span></div>
+          <div class="row"><span class="tag"><span class="dot warn"></span>Headcount concentration</span><span id="headcount"></span></div>
+        </div>
+
+        <div class="mini" style="margin-top:14px;">
+          <h3>2026 Targets (editable)</h3>
+          <div class="row"><span class="muted">Margin floor</span><strong>≥ 20%</strong></div>
+          <div class="row"><span class="muted">Reduce cost leakage</span><strong>3–5% cost index</strong></div>
+          <div class="row"><span class="muted">Zero loss contracts</span><strong>100% reviewed</strong></div>
+          <div class="row"><span class="muted">CAFM cost visibility</span><strong>Full rollout</strong></div>
+        </div>
+
+        <div class="callout" style="margin-top:14px;">
+          <strong>How to read this dashboard:</strong><br/>
+          Focus on segments with <strong>high revenue</strong> but <strong>low margin</strong>. That’s where pricing correction, scope control, and manpower optimization will lift overall profitability fastest.
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span>Data source: Provided screenshots + Soft Services Western Excel pivot totals</span>
+      <span id="timestamp"></span>
+    </div>
+  </div>
+
+  <script>
+    const DATA = {"generated_for": "2025 Ops Dashboard (based on provided screenshots + Soft Services Western Excel pivot)", "currency": "SAR", "summary": {"total_revenue": 94160929.2, "total_cost": 77247331.45, "total_profit": 16913597.75, "overall_margin": 0.1796243718, "total_staff": 1567, "regions": ["Western", "Central"]}, "segments": [{"id": "soft_west", "service": "Soft Services", "region": "Western", "staff": 1172, "revenue": 63315840.0, "cost": 55922280.52, "profit": 7393559.48, "margin": 0.1167726667}, {"id": "soft_central", "service": "Soft Services", "region": "Central", "staff": 251, "revenue": 14006400.0, "cost": 8886649.06, "profit": 5119750.94, "margin": 0.3654714457}, {"id": "hard_west", "service": "Hard Services", "region": "Western", "staff": 87, "revenue": 13191889.2, "cost": 9986640.03, "profit": 3205249.17, "margin": 0.2430066419}, {"id": "hard_central", "service": "Hard Services", "region": "Central", "staff": 57, "revenue": 3646800.0, "cost": 2451761.84, "profit": 1195038.16, "margin": 0.3276649883}], "notes": ["Soft Services Western totals were read from the provided Excel pivot (yearly revenue 63,315,840; yearly profit 7,393,559.48; margin 11.68%).", "Hard Services Central annual cost inferred as revenue minus profit (2,451,761.84)."]};
+
+    const fmtSAR = (n) => {
+      const x = Number(n || 0);
+      return "SAR " + x.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    };
+    const fmtInt = (n) => Number(n||0).toLocaleString();
+    const fmtPct = (p) => (Number(p||0)*100).toFixed(1) + "%";
+
+    let viewMode = "service"; // service | region
+
+    function buildKPIs() {
+      const s = DATA.summary;
+      const tiles = [
+        { label: "Total Revenue (2025)", value: fmtSAR(s.total_revenue), hint: "All provided segments" },
+        { label: "Total Cost (2025)", value: fmtSAR(s.total_cost), hint: "Direct operational cost" },
+        { label: "Net Profit (2025)", value: fmtSAR(s.total_profit), hint: "Revenue - Cost" },
+        { label: "Overall Margin", value: fmtPct(s.overall_margin), hint: "Profit / Revenue" },
+        { label: "Total Staff", value: fmtInt(s.total_staff), hint: "Headcount in dataset" },
+        { label: "Regions in data", value: s.regions.length, hint: s.regions.join(", ") },
+      ];
+      const kpiWrap = document.getElementById("kpiTiles");
+      kpiWrap.innerHTML = "";
+      tiles.forEach(t => {
+        const el = document.createElement("div");
+        el.className = "kpi";
+        el.innerHTML = `
+          <div class="label">${t.label}</div>
+          <div class="value">${t.value}</div>
+          <div class="hint">${t.hint}</div>
+        `;
+        kpiWrap.appendChild(el);
+      });
+
+      document.getElementById("regionsPill").textContent = "Regions: " + s.regions.join(" • ");
+      document.getElementById("timestamp").textContent = "Generated: " + new Date().toLocaleString();
+      const headline = document.getElementById("headline");
+      headline.innerHTML = `
+        Overall profit is <strong>${fmtSAR(s.total_profit)}</strong> at <strong>${fmtPct(s.overall_margin)}</strong> margin.
+        Biggest cost-cutting opportunity is in <strong>high-revenue / low-margin</strong> segments (e.g., Soft Services — Western in this dataset).
+      `;
+    }
+
+    function groupSegments(mode) {
+      const segs = DATA.segments;
+      if (mode === "service") {
+        const m = {};
+        for (const x of segs) {
+          const key = x.service;
+          if (!m[key]) m[key] = { segment:key, region:"All", staff:0, revenue:0, cost:0, profit:0 };
+          m[key].staff += x.staff;
+          m[key].revenue += x.revenue;
+          m[key].cost += x.cost;
+          m[key].profit += x.profit;
+        }
+        return Object.values(m).map(r => ({...r, margin: r.profit / (r.revenue || 1)}));
+      }
+      // region view
+      const m = {};
+      for (const x of segs) {
+        const key = x.region;
+        if (!m[key]) m[key] = { segment:"All Services", region:key, staff:0, revenue:0, cost:0, profit:0 };
+        m[key].staff += x.staff;
+        m[key].revenue += x.revenue;
+        m[key].cost += x.cost;
+        m[key].profit += x.profit;
+      }
+      return Object.values(m).map(r => ({...r, margin: r.profit / (r.revenue || 1)}));
+    }
+
+    function setManagementFocus() {
+      const segs = DATA.segments.slice();
+      const byMargin = segs.slice().sort((a,b)=>a.margin-b.margin);
+      const byCostShare = segs.slice().sort((a,b)=> (b.cost/DATA.summary.total_cost)-(a.cost/DATA.summary.total_cost));
+      const byProfit = segs.slice().sort((a,b)=>b.profit-a.profit);
+      const byStaff = segs.slice().sort((a,b)=>b.staff-a.staff);
+
+      const label = (x) => `${x.service} — ${x.region} (${fmtPct(x.margin)})`;
+
+      document.getElementById("lowMargin").textContent = label(byMargin[0]);
+      document.getElementById("highCost").textContent = `${byCostShare[0].service} — ${byCostShare[0].region} (${
+        ((byCostShare[0].cost/DATA.summary.total_cost)*100).toFixed(1)
+      }% of cost)`;
+      document.getElementById("bestProfit").textContent = `${byProfit[0].service} — ${byProfit[0].region} (${
+        fmtSAR(byProfit[0].profit)
+      })`;
+      document.getElementById("headcount").textContent = `${byStaff[0].service} — ${byStaff[0].region} (${
+        fmtInt(byStaff[0].staff)
+      } staff)`;
+    }
+
+    function buildRows() {
+      const rows = groupSegments(viewMode);
+      const tbody = document.getElementById("segmentRows");
+      tbody.innerHTML = "";
+      rows.sort((a,b)=>b.revenue-a.revenue).forEach(r => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><strong>${r.segment}</strong></td>
+          <td>${r.region}</td>
+          <td class="right">${fmtInt(r.staff)}</td>
+          <td class="right">${fmtSAR(r.revenue)}</td>
+          <td class="right">${fmtSAR(r.cost)}</td>
+          <td class="right">${fmtSAR(r.profit)}</td>
+          <td class="right"><strong>${fmtPct(r.margin)}</strong></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById("primaryTitle").textContent =
+        viewMode === "service" ? "Performance by Service (2025)" : "Performance by Region (2025)";
+    }
+
+    function barRow(container, label, valuePct, rightLabel) {
+      const wrap = document.createElement("div");
+      wrap.style.margin = "10px 0";
+      wrap.innerHTML = `
+        <div class="row"><span>${label}</span><span class="muted">${rightLabel}</span></div>
+        <div class="bar"><div style="width:${Math.max(0, Math.min(100, valuePct))}%"></div></div>
+      `;
+      container.appendChild(wrap);
+      // animate
+      requestAnimationFrame(() => {
+        const bar = wrap.querySelector(".bar > div");
+        bar.style.width = `${Math.max(0, Math.min(100, valuePct))}%`;
+      });
+    }
+
+    function buildMixPanels() {
+      const mix = document.getElementById("profitMix");
+      const cp  = document.getElementById("costPressure");
+      mix.innerHTML = "";
+      cp.innerHTML = "";
+
+      const segs = DATA.segments.slice().sort((a,b)=>b.profit-a.profit);
+      const totalProfit = DATA.summary.total_profit || 1;
+
+      segs.forEach(s => {
+        const share = (s.profit/totalProfit)*100;
+        barRow(mix, `${s.service} — ${s.region}`, share, `${share.toFixed(1)}%`);
+      });
+
+      segs.slice().sort((a,b)=> (b.cost/b.revenue)-(a.cost/a.revenue)).forEach(s => {
+        const costPct = (s.cost / (s.revenue || 1)) * 100;
+        barRow(cp, `${s.service} — ${s.region}`, costPct, `${costPct.toFixed(1)}%`);
+      });
+    }
+
+    document.getElementById("toggleView").addEventListener("click", () => {
+      viewMode = (viewMode === "service") ? "region" : "service";
+      document.getElementById("toggleView").textContent = "Toggle View: " + (viewMode === "service" ? "Service / Region" : "Region / Service");
+      buildRows();
+      buildMixPanels();
+    });
+
+    document.getElementById("downloadJson").addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify(DATA, null, 2)], {type:"application/json"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "dashboard_data_2025.json";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+
+    // Init
+    buildKPIs();
+    setManagementFocus();
+    buildRows();
+    buildMixPanels();
+  </script>
+<script>
+  (function(){
+    const root = document.documentElement;
+    const saved = localStorage.getItem("pfm_theme");
+    if(saved === "light" || saved === "dark"){
+      root.setAttribute("data-theme", saved);
+    } else {
+      // default: dark
+      root.setAttribute("data-theme", "dark");
+    }
+
+    function updateLabel(){
+      const btn = document.getElementById("themeToggle");
+      if(!btn) return;
+      const mode = root.getAttribute("data-theme") || "dark";
+      btn.textContent = (mode === "light") ? "Dark mode" : "Light mode";
+    }
+
+    document.addEventListener("click", function(e){
+      const t = e.target;
+      if(t && t.id === "themeToggle"){
+        const mode = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+        root.setAttribute("data-theme", mode);
+        localStorage.setItem("pfm_theme", mode);
+        updateLabel();
+      }
+    });
+
+    // Ensure label is correct after page load
+    window.addEventListener("DOMContentLoaded", updateLabel);
+    updateLabel();
+  })();
+</script>
+
+</body>
+</html>
